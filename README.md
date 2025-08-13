@@ -2,7 +2,7 @@ Este projeto apresenta um sistema de biblioteca em que o usuário pode criar uma
 
 O protótipo de projeto usa as seguintes ferramentas:
 
-Python com Flask (Backend)
-Banco de Dados com Sqlite3
-Frontend com HTML, CSS e JavaScript
-Infraestrutura local (inicialmente).
+- Python com Flask (Backend)
+- Banco de Dados com Sqlite3
+- Frontend com HTML, CSS e JavaScript
+- Infraestrutura local (inicialmente).
