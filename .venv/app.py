@@ -3,11 +3,14 @@ from flask import Flask, jsonify, request
 from datetime import date, timedelta
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from passlib.hash import pbkdf2_sha256
+from flask_cors import CORS
+
 
 hoje = date.today()
 
 app = Flask(__name__) ##Criar uma instância do flask
 app.config["JWT_SECRET_KEY"] = "S@ntos20,02" ##Chave secreta para autenticação
+CORS(app)
 jwt = JWTManager(app)
 
 @app.route("/cadastrar", methods=['POST'])
@@ -17,8 +20,8 @@ def novo_usuario():
     username = data['nome']
     genero = data['genero']
     idade = data['idade']
-    email = data.get['email']
-    senha = data.get['senha']
+    email = data.get('email')
+    senha = data.get('senha')
     senha_hash = pbkdf2_sha256.hash(senha)
 
     ##Verifica se o email e a senha vieram no json
@@ -48,8 +51,8 @@ def logar_usuario():
     data = request.json
 
     ##Coleta de dados do json
-    email = data.get['email']
-    senha = data.get['senha']
+    email = data.get('email')
+    senha = data.get('senha')
 
     ##Verifica se o email e a senha vieram no json
     if email == None or senha == None:
@@ -72,19 +75,24 @@ def logar_usuario():
     if pbkdf2_sha256.verify(senha, hash_senha) == False:
         return jsonify({"message": "O usuário ou a senha estão incorretos."}), 400
 
-    token = create_access_token(identity=user_id)
+    token = create_access_token(identity=str(user_id))
     return jsonify({"token": token}), 200
 
 @app.route("/listar_livros")
+@jwt_required()
 def lista_livros():
-    ##Consultar o banco de dados
     conexao = sqlite3.connect("kaue.db")
     cursor = conexao.cursor()
-    cursor.execute("SELECT * FROM LIVROS")
+
+    #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
+    cursor.execute("SELECT LIVROS.*, RESERVAS.ID FROM LIVROS LEFT JOIN RESERVAS "
+                   "ON LIVROS.ID = RESERVAS.ID_LIVRO AND LIVROS.DISPONIBILIDADE = 0 "
+                   "AND RESERVAS.DATA_DEVOLUCAO_REAL IS NULL")
+
     tabela_livros = cursor.fetchall()
     conexao.close()
 
-    ##Transformar a consulta do banco de dados em uma lista do Python
+    #Criar lista para armazenar os valores da consulta
     lista_livros = []
     for livro in tabela_livros:
         lista_livros.append({
@@ -94,34 +102,29 @@ def lista_livros():
             'autor': livro[3],
             'data_lancamento': livro[4],
             'disponibilidade': bool(livro[5]),
+            'id_reserva': livro[6]
         })
 
-    ##Retornar a lista como um arquivo JSON
     return jsonify(lista_livros)
 
 @app.route("/reservar", methods=['POST'])
+@jwt_required()
 def reservar_livro():
     data = request.json
     ##Coletar o ID que irá ao banco de dados
     id_livro = data['id_livro']
-    id_usuario = data['id_usuario']
+    id_usuario = get_jwt_identity()
 
     conexao = sqlite3.connect("kaue.db")
     cursor = conexao.cursor()
 
-    ##Consultar existencia do usuario na tabela usuarios
-    cursor.execute("SELECT ID FROM USUARIOS WHERE id = ?", (id_usuario,))
-    existencia = cursor.fetchone()
-    if existencia == None:
-        conexao.close()
-        return jsonify({"message": "Usuario com o ID informado não foi encontrado."}), 404
+    ##Consultar se o usuário já tem uma reserva
+    cursor.execute("SELECT QTD_RESERVAS FROM USUARIOS WHERE ID = ?", (id_usuario,))
+    qtd_reservas = cursor.fetchone()[0]
 
-    ##Consultar existencia do livro na tabela livros
-    cursor.execute("SELECT ID FROM LIVROS WHERE id = ?", (id_livro,))
-    existencia = cursor.fetchone()
-    if existencia == None:
+    if qtd_reservas != None:
         conexao.close()
-        return jsonify({"message": "Livro com o ID informado não foi encontrado."}), 404
+        return jsonify({"message": "Não é possível fazer mais de uma reserva ao mesmo tempo"}), 400
 
     ##Consultar disponibilidade do livro na tabela livros
     cursor.execute("SELECT DISPONIBILIDADE FROM LIVROS WHERE id = ?", (id_livro,))
@@ -129,6 +132,7 @@ def reservar_livro():
     if disponibilidade == 1:
         cursor.execute("INSERT INTO RESERVAS (id_usuario, id_livro, data_reserva, data_devolucao) VALUES (?, ?, ?, ?)", (id_usuario, id_livro, hoje, hoje + timedelta(days=30)))
         cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 0 WHERE ID = ?", (id_livro,))
+        cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = 1 WHERE ID = ?", (id_usuario,))
         conexao.commit()
         conexao.close()
         return jsonify({"message": "Seu livro foi reservado com sucesso!"}), 200
@@ -137,31 +141,47 @@ def reservar_livro():
         conexao.close()
         return jsonify({"message": "Este livro está indisponível no momento."}), 400
 @app.route("/devolver", methods=['POST'])
+@jwt_required()
 def devolver_livro():
     data = request.json
     ##Coletar o ID que irá ao banco de dados
-    id_livro = data['id_livro']
+    id_reserva = data['id_reserva']
+    id_usuario = get_jwt_identity()
 
     conexao = sqlite3.connect("kaue.db")
     cursor = conexao.cursor()
 
-    ##Consultar disponibilidade no banco de dados
-    cursor.execute("SELECT DISPONIBILIDADE FROM LIVROS WHERE id = ?", (id_livro,))
-    disponibilidade = cursor.fetchone()[0]
+    ##Consultar se a reserva está em andamento
+    cursor.execute("SELECT DATA_DEVOLUCAO_REAL FROM RESERVAS WHERE ID = ?", (id_reserva,))
+    devolution_date = cursor.fetchone()[0]
 
-    ##Atualizando o status do livro se ele estiver mesmo emprestado
-    if disponibilidade == 0:
-        cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 1 WHERE id = ?", (id_livro,))
-        conexao.commit()
-        conexao.close()
-        return jsonify({"message": "Livro devolvido com sucesso!"}), 200
-    ##Retornar mensagem explicativa caso o livro não precise ser devolvido
+    if devolution_date is not None:
+        return jsonify({"message": "Este livro já foi devolvido nesta reserva"}), 400
+
+    ##Consultar se o proprietário da reserva recebida é igual ao usuário que está solicitando a devolução
+    cursor.execute("SELECT ID_USUARIO FROM RESERVAS WHERE ID = ?", (id_reserva,))
+    book_owner = cursor.fetchone()[0]
+
+    if book_owner is not None:
+        book_owner = str(book_owner)
+        if book_owner != id_usuario:
+            conexao.close()
+            return jsonify({"message": "Não é você quem está em posse deste livro."}), 400
+        else:
+            cursor.execute("SELECT ID_LIVRO FROM RESERVAS WHERE ID = ?", (id_reserva,))
+            id_livro = cursor.fetchone()[0]
+            cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 1 WHERE ID = ?", (id_livro,))
+            cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = NULL WHERE ID = ?", (id_usuario,))
+            cursor.execute("UPDATE RESERVAS SET data_devolucao_real = ? WHERE ID = ?", (hoje, id_reserva))
+            conexao.commit()
+            conexao.close()
+            return jsonify({"message": "Livro devolvido com sucesso!"}), 200
+
     else:
-        conexao.close()
-        return jsonify({"message": "Este livro não precisa ser devolvido."}), 400
-
+        return jsonify({"message": "Esse livro não foi reservado ainda"}), 400
 
 @app.route("/avaliar", methods=['POST'])
+@jwt_required()
 def avaliar_livro():
     data = request.json
 
@@ -170,14 +190,14 @@ def avaliar_livro():
 
     ##Coletar o ID do livro e pessoa que irá ao banco de dados
     id_livro = data['id_livro']
-    id_pessoa = data['id_pessoa']
+    id_pessoa = get_jwt_identity()
     nota = data['nota']
 
     ##Consultar se existe uma avaliação com o livro e a pessoa informada
     cursor.execute("SELECT ID FROM AVALIACOES WHERE ID_USUARIO = ? AND ID_LIVRO = ?", (id_pessoa, id_livro,))
-    id_avaliacoes = cursor.fetchone()[0]
+    id_avaliacoes = cursor.fetchone()
 
-    if (id_avaliacoes == NULL):
+    if (id_avaliacoes == None):
         conexao.close()
         return jsonify({"message": "Não é possível adicionar duas avaliações para o mesmo livro - Caso queira, é possível editar"}), 400
 
@@ -189,3 +209,6 @@ def avaliar_livro():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
