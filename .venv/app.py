@@ -35,7 +35,10 @@ def novo_usuario():
     try:
         cursor.execute("INSERT INTO USUARIOS (NOME, GENERO, IDADE, EMAIL, SENHA) VALUES (?,?,?,?,?)", (username, genero, idade, email, senha_hash))
         conexao.commit()
-        return jsonify({"message": "Usuário cadastrado com sucesso!"}), 200
+        cursor.execute("SELECT ID, SENHA FROM USUARIOS WHERE EMAIL = ?", (email,))
+        user_id = cursor.fetchone()[0]
+        token = create_access_token(identity=str(user_id))
+        return jsonify({"message": "Usuário cadastrado com sucesso!", "token": token}), 200
 
     ##Retorna erro de integridade porque a coluna email só aceita valores únicos
     except sqlite3.IntegrityError:
@@ -44,7 +47,6 @@ def novo_usuario():
     ##Fechamento do banco de dados
     finally:
         conexao.close()
-
 
 @app.route("/login", methods=['POST'])
 def logar_usuario():
@@ -81,13 +83,16 @@ def logar_usuario():
 @app.route("/listar_livros")
 @jwt_required()
 def lista_livros():
+    id_usuario = get_jwt_identity()
+
     conexao = sqlite3.connect("kaue.db")
     cursor = conexao.cursor()
 
     #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
-    cursor.execute("SELECT LIVROS.*, RESERVAS.ID FROM LIVROS LEFT JOIN RESERVAS "
+    cursor.execute("SELECT LIVROS.*, RESERVAS.ID AS id_reserva, CASE WHEN RESERVAS.ID_USUARIO = ? THEN 1 "
+                   "ELSE 0 END AS usuario_reservou FROM LIVROS LEFT JOIN RESERVAS "
                    "ON LIVROS.ID = RESERVAS.ID_LIVRO AND LIVROS.DISPONIBILIDADE = 0 "
-                   "AND RESERVAS.DATA_DEVOLUCAO_REAL IS NULL")
+                   "AND RESERVAS.DATA_DEVOLUCAO_REAL IS NULL", (id_usuario,))
 
     tabela_livros = cursor.fetchall()
     conexao.close()
@@ -102,10 +107,45 @@ def lista_livros():
             'autor': livro[3],
             'data_lancamento': livro[4],
             'disponibilidade': bool(livro[5]),
-            'id_reserva': livro[6]
+            'id_reserva': livro[6],
+            'usuario_reservou': livro[7]
         })
 
     return jsonify(lista_livros)
+
+@app.route("/listar_reservas")
+@jwt_required()
+def lista_reservas():
+    id_usuario = get_jwt_identity()
+
+    conexao = sqlite3.connect("kaue.db")
+    cursor = conexao.cursor()
+
+    #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
+    cursor.execute("SELECT RESERVAS.id, RESERVAS.data_reserva, RESERVAS.data_devolucao, RESERVAS.data_devolucao_real, "
+                   "USUARIOS.NOME AS proprietario, LIVROS.titulo_livro, LIVROS.genero, CASE WHEN RESERVAS.data_devolucao_real IS NULL THEN "
+                   "'Em andamento' ELSE 'Ja devolvido' END AS state FROM RESERVAS LEFT JOIN USUARIOS ON USUARIOS.ID = "
+                   "RESERVAS.id_usuario LEFT JOIN LIVROS ON LIVROS.ID = RESERVAS.id_livro WHERE reservas.id_usuario = "
+                   "?", (id_usuario,))
+
+    tabela_reservas = cursor.fetchall()
+    conexao.close()
+
+    #Criar lista para armazenar os valores da consulta
+    lista_reservas = []
+    for reserva in tabela_reservas:
+        lista_reservas.append({
+            'id': reserva[0],
+            'data_reserva': reserva[1],
+            'data_devolucao': reserva[2],
+            'data_devolucao_real': reserva[3],
+            'proprietario': reserva[4],
+            'titulo_livro': reserva[5],
+            'genero': reserva[6],
+            'state': reserva[7]
+        })
+
+    return jsonify(lista_reservas)
 
 @app.route("/reservar", methods=['POST'])
 @jwt_required()
@@ -179,33 +219,6 @@ def devolver_livro():
 
     else:
         return jsonify({"message": "Esse livro não foi reservado ainda"}), 400
-
-@app.route("/avaliar", methods=['POST'])
-@jwt_required()
-def avaliar_livro():
-    data = request.json
-
-    conexao = sqlite3.connect("kaue.db")
-    cursor = conexao.cursor()
-
-    ##Coletar o ID do livro e pessoa que irá ao banco de dados
-    id_livro = data['id_livro']
-    id_pessoa = get_jwt_identity()
-    nota = data['nota']
-
-    ##Consultar se existe uma avaliação com o livro e a pessoa informada
-    cursor.execute("SELECT ID FROM AVALIACOES WHERE ID_USUARIO = ? AND ID_LIVRO = ?", (id_pessoa, id_livro,))
-    id_avaliacoes = cursor.fetchone()
-
-    if (id_avaliacoes == None):
-        conexao.close()
-        return jsonify({"message": "Não é possível adicionar duas avaliações para o mesmo livro - Caso queira, é possível editar"}), 400
-
-    else:
-        cursor.execute("INSERT INTO AVALIACOES (id_livro, id_usuario, nota) VALUES (?, ?, ?)", (id_livro, id_pessoa, nota))
-        conexao.commit()
-        conexao.close()
-        return jsonify({"message": "Sua avaliação foi enviada!"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
