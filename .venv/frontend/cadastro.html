@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de usuário</title>
+    <link rel="stylesheet" href="assets\style.css">
+</head>
+<body>
+    <div class="main_div">
+        <div id="sigCont">
+                <h1>Cadastro de novos usuários</h1>
+                <form id="signInForm">
+                <input type="text" id="username" placeholder="Nome" required>
+                <p id="titleGender">Qual é o seu gênero?</p>
+                <div class="gender-group">
+                    <label>
+                        <input type="radio" name="gender" value="Masculino" required>
+                        Masculino
+                    </label>
+                    <label>
+                        <input type="radio" name="gender" value="Feminino">
+                        Feminino
+                    </label>
+                </div>
+                <input type="number" id="age" placeholder="Idade" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="senha" placeholder="Senha" required>
+                <button type="submit">Cadastrar</button>
+                </form>
+        </div>
+        <div>
+            <img src="C:\Users\kaues\OneDrive\Desktop\Code Space\Library Project\libraryProject\1722.jpg" alt="Library room">
+        </div>
+    </div>
+    <script src="assets\cadastrar.js"></script>
+</body>
+</html>
