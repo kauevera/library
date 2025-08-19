@@ -41,8 +41,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="livro-card">
                 <h3>${livro.titulo_livro}</h3>
                 <p>Autor: ${livro.autor}</p>
+                <p>ID Reserva: ${livro.id_reserva}</p>
                 <p>Status: ${livro.disponibilidade ? "Disponível" : "Indisponível"}</p>
-                <button onclick="reservarLivro(${livro.id})">Reservar</button>
+                ${!livro.disponibilidade && livro.usuario_reservou ?
+                    `<button onclick="devolverLivro(${livro.id_reserva})">Devolver</button>` :
+                    `<button onclick="reservarLivro(${livro.id})" ${livro.disponibilidade ? '' : 'disabled'}>
+                    ${livro.disponibilidade ? 'Reservar' : 'Indisponível'}
+                </button>`
+                }
             </div>
         `).join("");
 
@@ -70,6 +76,29 @@ async function reservarLivro(idLivro) {
 
         const data = await response.json();
         alert(data.message);
+        window.location.reload();
+    } catch (error) {
+        console.error("Erro:", error);
+    }
+}
+
+//Função para devolver o livro
+async function devolverLivro(idReserva) {
+    const token = localStorage.getItem("token");
+    
+    try {
+        const response = await fetch("http://localhost:5000/devolver", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ id_reserva: idReserva })
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        window.location.reload();
     } catch (error) {
         console.error("Erro:", error);
     }
