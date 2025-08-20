@@ -35,10 +35,11 @@ def novo_usuario():
     try:
         cursor.execute("INSERT INTO USUARIOS (NOME, GENERO, IDADE, EMAIL, SENHA) VALUES (?,?,?,?,?)", (username, genero, idade, email, senha_hash))
         conexao.commit()
-        cursor.execute("SELECT ID, SENHA FROM USUARIOS WHERE EMAIL = ?", (email,))
-        user_id = cursor.fetchone()[0]
+        cursor.execute("SELECT ID, NOME FROM USUARIOS WHERE EMAIL = ?", (email,))
+        user = cursor.fetchone()
+        user_id, username = user
         token = create_access_token(identity=str(user_id))
-        return jsonify({"message": "Usuário cadastrado com sucesso!", "token": token}), 200
+        return jsonify({"message": "Usuário cadastrado com sucesso!", "token": token, "username": username}), 200
 
     ##Retorna erro de integridade porque a coluna email só aceita valores únicos
     except sqlite3.IntegrityError:
@@ -63,7 +64,7 @@ def logar_usuario():
     ##Consultar o banco de dados
     conexao = sqlite3.connect("kaue.db")
     cursor = conexao.cursor()
-    cursor.execute("SELECT ID, SENHA FROM USUARIOS WHERE EMAIL = ?", (email,))
+    cursor.execute("SELECT ID, SENHA, NOME FROM USUARIOS WHERE EMAIL = ?", (email,))
     user = cursor.fetchone()
     conexao.close()
 
@@ -71,14 +72,14 @@ def logar_usuario():
     if user == None:
         return jsonify({"message": "O usuário ou a senha estão incorretos."}), 400
 
-    user_id, hash_senha = user
+    user_id, hash_senha, username = user
 
     ##Testa se o hash que veio do banco de dados, quando convertido para senha, é igual à senha digitada pelo usuário
     if pbkdf2_sha256.verify(senha, hash_senha) == False:
         return jsonify({"message": "O usuário ou a senha estão incorretos."}), 400
 
     token = create_access_token(identity=str(user_id))
-    return jsonify({"token": token}), 200
+    return jsonify({"token": token, "username": username}), 200
 
 @app.route("/listar_livros")
 @jwt_required()
