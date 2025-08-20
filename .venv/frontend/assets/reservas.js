@@ -1,6 +1,7 @@
 // Listar as reservas
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
@@ -9,6 +10,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
+        //Mostra o nome do usuário no cabeçalho
+        document.getElementById("nomeUsuario").textContent = `Reservas de ${username}`;
         //Mostrar estado de carregamento
         const reservasList = document.getElementById("reservasList");
         reservasList.innerHTML = "<p>Carregando reservas...</p>";
@@ -32,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Dados recebidos:", reservas); // Debug
 
         if (reservas.length === 0) {
-            reservasList.innerHTML = "<p>Nenhum livro disponível.</p>";
+            reservasList.innerHTML = "<p>Nenhuma reserva disponível.</p>";
             return;
         }
 
@@ -84,3 +87,10 @@ async function devolverLivro(idReserva) {
     }
 }
 
+async function logout() {
+    localStorage.removeItem("token");
+    
+    window.location.href = "index.html";
+        
+    alert("Logout realizado com sucesso!");
+}

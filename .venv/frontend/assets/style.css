@@ -159,6 +159,7 @@ label {
     padding: 0;
     display: flex; 
     justify-content: flex-start; 
+    align-items: center;
 }
 
 .menu ul li {
@@ -168,6 +169,7 @@ label {
 .menu ul li a {
     text-decoration: none;
     color: white;
+    font-size: 14px;
     font-weight: bold;
     padding: 8px 12px;
     border-radius: 5px;
@@ -178,6 +180,33 @@ label {
 .menu ul li a:hover {
     background-color: #555;
     color: #00c3ff;
+}
+
+.menu ul span {
+    text-decoration: none;
+    color: #90caf9;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.menu ul li button {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #222;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu ul li button:hover {
+    background-color: #64b5f6;
 }
 
 .container {
@@ -243,6 +272,52 @@ label {
 .livro-card button:hover {
     background-color: #64b5f6;
 }
+
+/*Pág de Reservas*/
+
+.reserva-card {
+    background-color: #90caf9;
+    padding: 10px 20px;
+    margin: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.reserva-card h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2b2b2b;
+}
+
+.reserva-card p {
+    font-size: 14px;
+    color: #2b2b2b;
+}
+
+.reserva-card button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #2b2b2b;
+    color: #90caf9;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.reserva-card button:hover {
+    background-color: #000000;
+}
+
+
+
+
+
+
+
+
 
 /*Erros*/
 .error {

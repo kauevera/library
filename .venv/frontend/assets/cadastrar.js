@@ -18,6 +18,7 @@ document.getElementById("signInForm").addEventListener("submit", async (e) => {
 
         if (response.ok) {
             localStorage.setItem("token", data.token); // Armazena o token
+            localStorage.setItem("username", data.username); // Armazena o username
             alert(data.message);
             window.location.href = "livros.html";
             //window.location.href = "livros.html"; // Redireciona

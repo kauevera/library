@@ -1,6 +1,7 @@
 // Listar os livros
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
@@ -9,6 +10,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
+        //Mostra o nome do usuário no cabeçalho
+        document.getElementById("nomeUsuario").textContent = `Olá ${username}!`;
         //Mostrar estado de carregamento
         const livrosList = document.getElementById("livrosList");
         livrosList.innerHTML = "<p>Carregando livros...</p>";
@@ -102,5 +105,13 @@ async function devolverLivro(idReserva) {
     } catch (error) {
         console.error("Erro:", error);
     }
+}
+
+async function logout() {
+    localStorage.removeItem("token");
+    
+    window.location.href = "index.html";
+        
+    alert("Logout realizado com sucesso!");
 }
 

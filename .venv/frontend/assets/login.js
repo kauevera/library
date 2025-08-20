@@ -1,4 +1,4 @@
-// Login
+//Login
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
@@ -15,6 +15,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
         if (response.ok) {
             localStorage.setItem("token", data.token); // Armazena o token
+            localStorage.setItem("username", data.username); // Armazena o username
             alert(data.message || "O login deu certo!");
             window.location.href = "livros.html";
             //window.location.href = "livros.html"; // Redireciona
