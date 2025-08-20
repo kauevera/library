@@ -4,6 +4,7 @@ import pandas
 conexao = sqlite3.connect("kaue.db")
 cursor = conexao.cursor()
 
+"""
 usuarios = pandas.read_sql_query("SELECT * FROM USUARIOS", conexao)
 livros = pandas.read_sql_query("SELECT * FROM LIVROS", conexao)
 reservas = pandas.read_sql_query("SELECT * FROM RESERVAS", conexao)
@@ -13,6 +14,14 @@ print(usuarios)
 print(livros)
 print(reservas)
 print(avaliacoes)
+"""
+
+cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 1")
+conexao.commit()
+conexao.close()
+
+
+
 
 
 
