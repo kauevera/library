@@ -1,13 +1,20 @@
+
 {
   "version": 2,
-  "public": true,
   "builds": [
     {
-      "src": ".venv/frontend/**/*",
+      "src": "frontend/**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/assets/**/*",
       "use": "@vercel/static"
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": ".venv/frontend/$1" }
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
   ]
 }
