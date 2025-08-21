@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
-    const API_URL = "https://library-backend-p7ql.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com";
     
     if (!token) {
         alert("Você precisa fazer login primeiro");

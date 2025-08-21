@@ -3,7 +3,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
-    const API_URL = "https://library-backend-p7ql.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com";
 
     try {
         const response = await fetch(`${API_URL}/login`, {
