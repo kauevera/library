@@ -1,20 +1,3 @@
-
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "frontend/**/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "frontend/assets/**/*",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
-    }
-  ]
+    "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
