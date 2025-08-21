@@ -3,9 +3,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
+    const API_URL = "https://library-backend-p7ql.onrender.com";
 
     try {
-        const response = await fetch("http://localhost:5000/login", {
+        const response = await fetch(`${API_URL}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, senha })

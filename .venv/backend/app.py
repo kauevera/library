@@ -1,17 +1,54 @@
-import sqlite3
+import os
+import psycopg2
 from flask import Flask, jsonify, request
 from datetime import date, timedelta
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from passlib.hash import pbkdf2_sha256
 from flask_cors import CORS
+from urllib.parse import urlparse
+from dotenv import load_dotenv
 
+load_dotenv()
 
 hoje = date.today()
 
 app = Flask(__name__) ##Criar uma instância do flask
-app.config["JWT_SECRET_KEY"] = "S@ntos20,02" ##Chave secreta para autenticação
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY', 'chave-secreta-padrao')
+
 CORS(app)
+
 jwt = JWTManager(app)
+
+
+def get_db_connection():
+    # Se usar Neon.tech, eles fornecem uma URL completa
+    database_url = os.environ.get('DATABASE_URL')
+
+    if database_url:
+        # Parse da URL do Neon
+        parsed = urlparse(database_url)
+        conn = psycopg2.connect(
+            host=parsed.hostname,
+            database=parsed.path[1:],
+            user=parsed.username,
+            password=parsed.password,
+            port=parsed.port,
+            sslmode='require'
+        )
+    else:
+        # Fallback para variáveis individuais
+        conn = psycopg2.connect(
+            host=os.environ.get('DB_HOST'),
+            database=os.environ.get('DB_NAME'),
+            user=os.environ.get('DB_USER'),
+            password=os.environ.get('DB_PASSWORD'),
+            port=os.environ.get('DB_PORT', 5432)
+        )
+    return conn
+
+@app.route("/")
+def home():
+    return jsonify({"message": "Projeto ok"})
 
 @app.route("/cadastrar", methods=['POST'])
 def novo_usuario():
@@ -29,25 +66,27 @@ def novo_usuario():
         return jsonify({"message": "É obrigatório informar o e-mail e a senha"}), 400
 
     ##Abertura do banco de dados
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
 
     try:
-        cursor.execute("INSERT INTO USUARIOS (NOME, GENERO, IDADE, EMAIL, SENHA) VALUES (?,?,?,?,?)", (username, genero, idade, email, senha_hash))
+        cursor.execute("INSERT INTO USUARIOS (NOME, GENERO, IDADE, EMAIL, SENHA) VALUES (%s,%s,%s,%s,%s)", (username, genero, idade, email, senha_hash))
         conexao.commit()
-        cursor.execute("SELECT ID, NOME FROM USUARIOS WHERE EMAIL = ?", (email,))
+        cursor.execute("SELECT ID, NOME FROM USUARIOS WHERE EMAIL = %s", (email,))
         user = cursor.fetchone()
         user_id, username = user
         token = create_access_token(identity=str(user_id))
         return jsonify({"message": "Usuário cadastrado com sucesso!", "token": token, "username": username}), 200
 
     ##Retorna erro de integridade porque a coluna email só aceita valores únicos
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({"message": "Já existe um usuário com este e-mail"}), 400
 
     ##Fechamento do banco de dados
     finally:
         conexao.close()
+
+    pass
 
 @app.route("/login", methods=['POST'])
 def logar_usuario():
@@ -62,9 +101,9 @@ def logar_usuario():
         return jsonify({"message": "É obrigatório informar o e-mail e a senha"}), 400
 
     ##Consultar o banco de dados
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
-    cursor.execute("SELECT ID, SENHA, NOME FROM USUARIOS WHERE EMAIL = ?", (email,))
+    cursor.execute("SELECT ID, SENHA, NOME FROM USUARIOS WHERE EMAIL = %s", (email,))
     user = cursor.fetchone()
     conexao.close()
 
@@ -81,19 +120,21 @@ def logar_usuario():
     token = create_access_token(identity=str(user_id))
     return jsonify({"token": token, "username": username}), 200
 
+    pass
+
 @app.route("/listar_livros")
 @jwt_required()
 def lista_livros():
     id_usuario = get_jwt_identity()
 
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
 
     #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
-    cursor.execute("SELECT LIVROS.*, RESERVAS.ID AS id_reserva, CASE WHEN RESERVAS.ID_USUARIO = ? THEN 1 "
-                   "ELSE 0 END AS usuario_reservou FROM LIVROS LEFT JOIN RESERVAS "
-                   "ON LIVROS.ID = RESERVAS.ID_LIVRO AND LIVROS.DISPONIBILIDADE = 0 "
-                   "AND RESERVAS.DATA_DEVOLUCAO_REAL IS NULL", (id_usuario,))
+    cursor.execute("SELECT livros.*, reservas.id AS id_reserva, CASE WHEN reservas.id_usuario = %s THEN 1 "
+                   "ELSE 0 END AS usuario_reservou FROM livros LEFT JOIN reservas "
+                   "ON livros.id = reservas.id_livro AND livros.disponibilidade = 0 "
+                   "AND reservas.data_devolucao_real IS NULL", (id_usuario,))
 
     tabela_livros = cursor.fetchall()
     conexao.close()
@@ -114,20 +155,22 @@ def lista_livros():
 
     return jsonify(lista_livros)
 
+    pass
+
 @app.route("/listar_reservas")
 @jwt_required()
 def lista_reservas():
     id_usuario = get_jwt_identity()
 
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
 
     #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
-    cursor.execute("SELECT RESERVAS.id, RESERVAS.data_reserva, RESERVAS.data_devolucao, RESERVAS.data_devolucao_real, "
-                   "USUARIOS.NOME AS proprietario, LIVROS.titulo_livro, LIVROS.genero, CASE WHEN RESERVAS.data_devolucao_real IS NULL THEN "
-                   "'Em andamento' ELSE 'Ja devolvido' END AS state FROM RESERVAS LEFT JOIN USUARIOS ON USUARIOS.ID = "
-                   "RESERVAS.id_usuario LEFT JOIN LIVROS ON LIVROS.ID = RESERVAS.id_livro WHERE reservas.id_usuario = "
-                   "?", (id_usuario,))
+    cursor.execute("SELECT reservas.id, reservas.data_reserva, reservas.data_devolucao, reservas.data_devolucao_real, "
+                   "USUARIOS.NOME AS proprietario, livros.titulo_livro, livros.genero, CASE WHEN reservas.data_devolucao_real IS NULL THEN "
+                   "'Em andamento' ELSE 'Ja devolvido' END AS state FROM reservas LEFT JOIN USUARIOS ON USUARIOS.ID = "
+                   "reservas.id_usuario LEFT JOIN livros ON livros.id = reservas.id_livro WHERE reservas.id_usuario = "
+                   "%s", (id_usuario,))
 
     tabela_reservas = cursor.fetchall()
     conexao.close()
@@ -148,6 +191,8 @@ def lista_reservas():
 
     return jsonify(lista_reservas)
 
+    pass
+
 @app.route("/reservar", methods=['POST'])
 @jwt_required()
 def reservar_livro():
@@ -156,11 +201,11 @@ def reservar_livro():
     id_livro = data['id_livro']
     id_usuario = get_jwt_identity()
 
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
 
     ##Consultar se o usuário já tem uma reserva
-    cursor.execute("SELECT QTD_RESERVAS FROM USUARIOS WHERE ID = ?", (id_usuario,))
+    cursor.execute("SELECT QTD_RESERVAS FROM USUARIOS WHERE ID = %s", (id_usuario,))
     qtd_reservas = cursor.fetchone()[0]
 
     if qtd_reservas != None:
@@ -168,12 +213,12 @@ def reservar_livro():
         return jsonify({"message": "Não é possível fazer mais de uma reserva ao mesmo tempo"}), 400
 
     ##Consultar disponibilidade do livro na tabela livros
-    cursor.execute("SELECT DISPONIBILIDADE FROM LIVROS WHERE id = ?", (id_livro,))
+    cursor.execute("SELECT disponibilidade FROM livros WHERE id = %s", (id_livro,))
     disponibilidade = cursor.fetchone()[0]
     if disponibilidade == 1:
-        cursor.execute("INSERT INTO RESERVAS (id_usuario, id_livro, data_reserva, data_devolucao) VALUES (?, ?, ?, ?)", (id_usuario, id_livro, hoje, hoje + timedelta(days=30)))
-        cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 0 WHERE ID = ?", (id_livro,))
-        cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = 1 WHERE ID = ?", (id_usuario,))
+        cursor.execute("INSERT INTO reservas (id_usuario, id_livro, data_reserva, data_devolucao) VALUES (%s, %s, %s, %s)", (id_usuario, id_livro, hoje, hoje + timedelta(days=30)))
+        cursor.execute("UPDATE livros SET disponibilidade = 0 WHERE ID = %s", (id_livro,))
+        cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = 1 WHERE ID = %s", (id_usuario,))
         conexao.commit()
         conexao.close()
         return jsonify({"message": "Seu livro foi reservado com sucesso!"}), 200
@@ -189,18 +234,18 @@ def devolver_livro():
     id_reserva = data['id_reserva']
     id_usuario = get_jwt_identity()
 
-    conexao = sqlite3.connect("kaue.db")
+    conexao = get_db_connection()
     cursor = conexao.cursor()
 
     ##Consultar se a reserva está em andamento
-    cursor.execute("SELECT DATA_DEVOLUCAO_REAL FROM RESERVAS WHERE ID = ?", (id_reserva,))
+    cursor.execute("SELECT data_devolucao_real FROM reservas WHERE ID = %s", (id_reserva,))
     devolution_date = cursor.fetchone()[0]
 
     if devolution_date is not None:
         return jsonify({"message": "Este livro já foi devolvido nesta reserva"}), 400
 
     ##Consultar se o proprietário da reserva recebida é igual ao usuário que está solicitando a devolução
-    cursor.execute("SELECT ID_USUARIO FROM RESERVAS WHERE ID = ?", (id_reserva,))
+    cursor.execute("SELECT id_usuario FROM reservas WHERE id = %s", (id_reserva,))
     book_owner = cursor.fetchone()[0]
 
     if book_owner is not None:
@@ -209,11 +254,11 @@ def devolver_livro():
             conexao.close()
             return jsonify({"message": "Não é você quem está em posse deste livro."}), 400
         else:
-            cursor.execute("SELECT ID_LIVRO FROM RESERVAS WHERE ID = ?", (id_reserva,))
+            cursor.execute("SELECT id_livro FROM reservas WHERE id = %s", (id_reserva,))
             id_livro = cursor.fetchone()[0]
-            cursor.execute("UPDATE LIVROS SET DISPONIBILIDADE = 1 WHERE ID = ?", (id_livro,))
-            cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = NULL WHERE ID = ?", (id_usuario,))
-            cursor.execute("UPDATE RESERVAS SET data_devolucao_real = ? WHERE ID = ?", (hoje, id_reserva))
+            cursor.execute("UPDATE livros SET disponibilidade = 1 WHERE id = %s", (id_livro,))
+            cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = NULL WHERE ID = %s", (id_usuario,))
+            cursor.execute("UPDATE reservas SET data_devolucao_real = %s WHERE id = %s", (hoje, id_reserva))
             conexao.commit()
             conexao.close()
             return jsonify({"message": "Livro devolvido com sucesso!"}), 200
@@ -221,8 +266,11 @@ def devolver_livro():
     else:
         return jsonify({"message": "Esse livro não foi reservado ainda"}), 400
 
+    pass
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 

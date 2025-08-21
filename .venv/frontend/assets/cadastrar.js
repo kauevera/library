@@ -6,9 +6,10 @@ document.getElementById("signInForm").addEventListener("submit", async (e) => {
     const idade = document.getElementById("age").value;
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
+    const API_URL = "https://library-backend-p7ql.onrender.com";
 
     try {
-        const response = await fetch("http://localhost:5000/cadastrar", {
+        const response = await fetch(`${API_URL}/cadastrar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nome, genero, idade, email, senha })

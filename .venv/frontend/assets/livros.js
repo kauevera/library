@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
+    const API_URL = "https://library-backend-p7ql.onrender.com";
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
@@ -17,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         livrosList.innerHTML = "<p>Carregando livros...</p>";
 
         //Fazer a requisição com headers corretos
-        const response = await fetch("http://localhost:5000/listar_livros", {
+        const response = await fetch(`${API_URL}/listar_livros`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
