@@ -1,0 +1,363 @@
+/*Página básica*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+/*Containers principais*/
+.main_div {
+    display: flex;
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    overflow: hidden;
+    max-width: 900px;
+    width: 90%;
+}
+
+/*Login e cadastro*/
+#logCont, #sigCont {
+    flex: 1;
+    padding: 50px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #1e1e1e;
+}
+
+#logCont h1, #sigCont h1 {
+    margin-bottom: 30px;
+    font-size: 32px;
+    color: #ffffff;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+form input:focus {
+    border-color: #90caf9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(144,202,249,0.7);
+}
+
+form button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #90caf9;
+    color: #121212;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #64b5f6;
+}
+
+p {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/*Botões Radio*/
+input[type="radio"] {
+    margin-right: 8px;
+}
+
+label {
+    margin-right: 15px;
+    font-size: 14px;
+    color: #e0e0e0;
+}
+
+.gender-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.gender-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.gender-group input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    accent-color: #90caf9; /* cor do círculo quando selecionado */
+}
+
+/*Links*/
+#logCont a {
+    color: #90caf9;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#logCont a:hover {
+    text-decoration: underline;
+}
+
+/*Imagens*/
+#libImgCont, .main_div > div:last-child {
+    flex: 1;
+    overflow: hidden;
+}
+
+#libImgCont img, .main_div > div:last-child img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-left: 1px solid #444;
+}
+
+/*Pág de Livros*/
+
+.menu {
+    background-color: #222;
+    padding: 10px 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+}
+
+.menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex; 
+    justify-content: flex-start; 
+    align-items: center;
+}
+
+.menu ul li {
+    margin: 0 15px;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+
+.menu ul li a:hover {
+    background-color: #555;
+    color: #00c3ff;
+}
+
+.menu ul span {
+    text-decoration: none;
+    color: #90caf9;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.menu ul li button {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #222;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu ul li button:hover {
+    background-color: #64b5f6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.container h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+}
+
+#livrosList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.livro-card {
+    background-color: #2b2b2b;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.livro-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+
+.livro-card h3 {
+    margin-bottom: 1px;
+    color: #90caf9;
+    font-size: 20px;
+}
+
+.livro-card p {
+    margin-bottom: 10px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+.livro-card button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #90caf9;
+    color: #121212;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.livro-card button:hover {
+    background-color: #64b5f6;
+}
+
+/*Pág de Reservas*/
+
+.reserva-card {
+    background-color: #90caf9;
+    padding: 10px 20px;
+    margin: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.reserva-card h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2b2b2b;
+}
+
+.reserva-card p {
+    font-size: 14px;
+    color: #2b2b2b;
+}
+
+.reserva-card button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #2b2b2b;
+    color: #90caf9;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.reserva-card button:hover {
+    background-color: #000000;
+}
+
+
+
+
+
+
+
+
+
+/*Erros*/
+.error {
+    color: #ff5252;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+#livrosList p {
+    text-align: center;
+    font-size: 16px;
+    color: #ccc;
+}
+
+/*Responsividade*/
+@media (max-width: 768px) {
+    .main_div {
+        flex-direction: column;
+        max-width: 400px;
+    }
+
+    .main_div > div:last-child {
+        height: 200px;
+        border-left: none;
+        border-top: 1px solid #444;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    .livro-card h3 {
+        font-size: 18px;
+    }
+
+    .livro-card p {
+        font-size: 13px;
+    }
+}
