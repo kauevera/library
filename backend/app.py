@@ -131,8 +131,8 @@ def lista_livros():
     cursor = conexao.cursor()
 
     #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
-    cursor.execute("SELECT livros.*, reservas.id AS id_reserva, CASE WHEN reservas.id_usuario = %s THEN 1 "
-                   "ELSE 0 END AS usuario_reservou FROM livros LEFT JOIN reservas "
+    cursor.execute("SELECT livros.*, reservas.id AS id_reserva, CASE WHEN reservas.id_usuario = %s THEN TRUE "
+                   "ELSE FALSE END AS usuario_reservou FROM livros LEFT JOIN reservas "
                    "ON livros.id = reservas.id_livro AND livros.disponibilidade = FALSE "
                    "AND reservas.data_devolucao_real IS NULL", (id_usuario,))
 
