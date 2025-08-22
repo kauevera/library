@@ -1,4 +1,4 @@
-import os
+"import os
 import psycopg2
 from flask import Flask, jsonify, request
 from datetime import date, timedelta
@@ -133,7 +133,7 @@ def lista_livros():
     #Consulta com LEFT JOIN para pegar o id reserva de livros indisponíveis
     cursor.execute("SELECT livros.*, reservas.id AS id_reserva, CASE WHEN reservas.id_usuario = %s THEN 1 "
                    "ELSE 0 END AS usuario_reservou FROM livros LEFT JOIN reservas "
-                   "ON livros.id = reservas.id_livro AND livros.disponibilidade = 0 "
+                   "ON livros.id = reservas.id_livro AND livros.disponibilidade = FALSE "
                    "AND reservas.data_devolucao_real IS NULL", (id_usuario,))
 
     tabela_livros = cursor.fetchall()
@@ -215,9 +215,9 @@ def reservar_livro():
     ##Consultar disponibilidade do livro na tabela livros
     cursor.execute("SELECT disponibilidade FROM livros WHERE id = %s", (id_livro,))
     disponibilidade = cursor.fetchone()[0]
-    if disponibilidade == 1:
+    if disponibilidade == False:
         cursor.execute("INSERT INTO reservas (id_usuario, id_livro, data_reserva, data_devolucao) VALUES (%s, %s, %s, %s)", (id_usuario, id_livro, hoje, hoje + timedelta(days=30)))
-        cursor.execute("UPDATE livros SET disponibilidade = 0 WHERE ID = %s", (id_livro,))
+        cursor.execute("UPDATE livros SET disponibilidade = FALSE WHERE ID = %s", (id_livro,))
         cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = 1 WHERE ID = %s", (id_usuario,))
         conexao.commit()
         conexao.close()
@@ -256,7 +256,7 @@ def devolver_livro():
         else:
             cursor.execute("SELECT id_livro FROM reservas WHERE id = %s", (id_reserva,))
             id_livro = cursor.fetchone()[0]
-            cursor.execute("UPDATE livros SET disponibilidade = 1 WHERE id = %s", (id_livro,))
+            cursor.execute("UPDATE livros SET disponibilidade = TRUE WHERE id = %s", (id_livro,))
             cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = NULL WHERE ID = %s", (id_usuario,))
             cursor.execute("UPDATE reservas SET data_devolucao_real = %s WHERE id = %s", (hoje, id_reserva))
             conexao.commit()
