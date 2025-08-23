@@ -1,8 +1,24 @@
-Este projeto apresenta um sistema de biblioteca em que o usuário pode criar uma conta (sistema de login), visualizar o catálogo de livros, fazer empréstimo de livros, devolvê-los e avaliar os livros.
+📚 Biblioteca Online
+🎓 Sobre o Projeto
+Um sistema completo de biblioteca online desenvolvido como projeto final para o curso CS50 da Harvard. O sistema permite que usuários se cadastrem, façam login, visualizem livros disponíveis e realizem reservas de forma intuitiva e segura.
 
-O protótipo de projeto usa as seguintes ferramentas:
+✨ Funcionalidades Principais
+🔐 Sistema de Autenticação JWT - Cadastro e login seguro de usuários
+📖 Catálogo de Livros - Listagem completa do acervo disponível
+🔄 Sistema de Reservas - Reserva e devolução de livros com controle de datas
+👤 Perfil de Usuário - Acompanhamento de reservas em andamento
+🎨 Interface Responsiva - Design adaptável para desktop e mobile
 
-- Python com Flask (Backend)
-- Banco de Dados com Sqlite3
-- Frontend com HTML, CSS e JavaScript
-- Infraestrutura local (inicialmente).
+🛠️ Tecnologias Utilizadas
+Backend
+Python 3 - Linguagem principal
+Flask - Framework web
+SQLite - Banco de dados local
+JWT - Autenticação segura
+Passlib - Criptografia de senhas
+
+Frontend
+HTML5 - Estrutura semântica
+CSS3 - Estilização moderna
+JavaScript ES6+ - Interatividade
+Fetch API - Comunicação com backend
