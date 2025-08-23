@@ -71,7 +71,7 @@ async function devolverLivro(idReserva) {
     const token = localStorage.getItem("token");
     
     try {
-        const response = await fetch("http://localhost:5000/devolver", {
+        const response = await fetch(`${API_URL}/devolver`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
