@@ -22,3 +22,6 @@ HTML5 - Estrutura semântica
 CSS3 - Estilização moderna
 JavaScript ES6+ - Interatividade
 Fetch API - Comunicação com backend
+
+⁉️ Como testar o projeto
+Acesse a URL: https://library-sigma-black.vercel.app/
