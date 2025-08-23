@@ -215,7 +215,7 @@ def reservar_livro():
     ##Consultar disponibilidade do livro na tabela livros
     cursor.execute("SELECT disponibilidade FROM livros WHERE id = %s", (id_livro,))
     disponibilidade = cursor.fetchone()[0]
-    if disponibilidade == False:
+    if disponibilidade == True:
         cursor.execute("INSERT INTO reservas (id_usuario, id_livro, data_reserva, data_devolucao) VALUES (%s, %s, %s, %s)", (id_usuario, id_livro, hoje, hoje + timedelta(days=30)))
         cursor.execute("UPDATE livros SET disponibilidade = FALSE WHERE ID = %s", (id_livro,))
         cursor.execute("UPDATE USUARIOS SET QTD_RESERVAS = 1 WHERE ID = %s", (id_usuario,))
