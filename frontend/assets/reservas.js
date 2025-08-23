@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 //Função para devolver o livro
 async function devolverLivro(idReserva) {
     const token = localStorage.getItem("token");
+    const API_URL = "https://library-q1vj.onrender.com";
     
     try {
         const response = await fetch(`${API_URL}/devolver`, {
