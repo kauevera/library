@@ -2,11 +2,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
-    const API_URL = "https://library-q1vj.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
-        window.location.href = "index.html";
+        window.location.href = "index.html"; // Redireciona
         return;
     }
 
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const livrosList = document.getElementById("livrosList");
         livrosList.innerHTML = "<p>Carregando livros...</p>";
 
-        //Fazer a requisição com headers corretos
+        //Inicia conexão com o servidor na rota necessária
         const response = await fetch(`${API_URL}/listar_livros`, {
             headers: {
                 "Content-Type": "application/json",
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         //Processar os livros
         const livros = await response.json();
-        console.log("Dados recebidos:", livros); // Debug
+        console.log("Dados recebidos:", livros);
 
         if (livros.length === 0) {
             livrosList.innerHTML = "<p>Nenhum livro disponível.</p>";
@@ -67,9 +67,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 //Função para reservar o livro
 async function reservarLivro(idLivro) {
     const token = localStorage.getItem("token");
-    const API_URL = "https://library-q1vj.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
     
     try {
+        //Inicia conexão com o servidor na rota necessária
         const response = await fetch(`${API_URL}/reservar`, {
             method: "POST",
             headers: {
@@ -90,9 +91,10 @@ async function reservarLivro(idLivro) {
 //Função para devolver o livro
 async function devolverLivro(idReserva) {
     const token = localStorage.getItem("token");
-    const API_URL = "https://library-q1vj.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
     
     try {
+        //Inicia conexão com o servidor na rota necessária
         const response = await fetch(`${API_URL}/devolver`, {
             method: "POST",
             headers: {
@@ -113,7 +115,7 @@ async function devolverLivro(idReserva) {
 async function logout() {
     localStorage.removeItem("token");
     
-    window.location.href = "index.html";
+    window.location.href = "index.html"; // Redireciona
         
     alert("Logout realizado com sucesso!");
 }

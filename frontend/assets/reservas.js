@@ -2,11 +2,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
-    const API_URL = "https://library-q1vj.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
-        window.location.href = "index.html";
+        window.location.href = "index.html"; // Redireciona
         return;
     }
 
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const reservasList = document.getElementById("reservasList");
         reservasList.innerHTML = "<p>Carregando reservas...</p>";
 
-        //Fazer a requisição com headers corretos
+        //Inicia conexão com o servidor na rota necessária
         const response = await fetch(`${API_URL}/listar_reservas`, {
             headers: {
                 "Content-Type": "application/json",
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         //Processar as reservas
         const reservas = await response.json();
-        console.log("Dados recebidos:", reservas); // Debug
+        console.log("Dados recebidos:", reservas);
 
         if (reservas.length === 0) {
             reservasList.innerHTML = "<p>Nenhuma reserva disponível.</p>";
@@ -69,9 +69,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 //Função para devolver o livro
 async function devolverLivro(idReserva) {
     const token = localStorage.getItem("token");
-    const API_URL = "https://library-q1vj.onrender.com";
+    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
     
     try {
+        //Inicia conexão com o servidor na rota necessária
         const response = await fetch(`${API_URL}/devolver`, {
             method: "POST",
             headers: {
@@ -92,7 +93,7 @@ async function devolverLivro(idReserva) {
 async function logout() {
     localStorage.removeItem("token");
     
-    window.location.href = "index.html";
+    window.location.href = "index.html"; // Redireciona
         
     alert("Logout realizado com sucesso!");
 }
