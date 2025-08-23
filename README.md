@@ -13,7 +13,7 @@ Um sistema completo de biblioteca online desenvolvido como projeto final para o 
 Backend
 Python 3 - Linguagem principal
 Flask - Framework web
-SQLite - Banco de dados local
+Postgre - Banco de dados no Neon
 JWT - Autenticação segura
 Passlib - Criptografia de senhas
 
