@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
-    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
+    const API_URL = "http://localhost:5000"; //Configurado com o domínio local
     
     if (!token) {
         alert("Você precisa fazer login primeiro");
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 //Função para reservar o livro
 async function reservarLivro(idLivro) {
     const token = localStorage.getItem("token");
-    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
+    const API_URL = "http://localhost:5000"; //Configurado com o domínio local
     
     try {
         //Inicia conexão com o servidor na rota necessária
@@ -91,7 +91,7 @@ async function reservarLivro(idLivro) {
 //Função para devolver o livro
 async function devolverLivro(idReserva) {
     const token = localStorage.getItem("token");
-    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
+    const API_URL = "http://localhost:5000"; //Configurado com o domínio local
     
     try {
         //Inicia conexão com o servidor na rota necessária
@@ -115,7 +115,7 @@ async function devolverLivro(idReserva) {
 async function logout() {
     localStorage.removeItem("token");
     
-    window.location.href = "index.html"; // Redireciona
+    window.location.href = "/"; // Redireciona
         
     alert("Logout realizado com sucesso!");
 }
