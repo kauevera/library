@@ -1,82 +1,61 @@
-📚 Biblioteca Online
-🎓 Sobre o Projeto
-Um sistema completo de biblioteca online desenvolvido como projeto final para o curso CS50 da Harvard. O sistema permite que usuários se cadastrem, façam login, visualizem livros disponíveis e realizem reservas de forma intuitiva e segura.
+# 📚 Biblioteca Online | CS50 Final Project
 
-✨ Funcionalidades Principais
-🔐 Sistema de Autenticação JWT - Cadastro e login seguro de usuários
-📖 Catálogo de Livros - Listagem completa do acervo disponível
-🔄 Sistema de Reservas - Reserva e devolução de livros com controle de datas
-👤 Perfil de Usuário - Acompanhamento de reservas em andamento
-🎨 Interface Responsiva - Design adaptável para desktop e mobile
+Este é um sistema de gestão de biblioteca desenvolvido como projeto final para o curso **CS50 da Harvard University**. A aplicação permite gerenciar o ciclo completo de empréstimos, desde o cadastro de utilizadores até ao controlo de disponibilidade de títulos.
 
-🛠️ Tecnologias Utilizadas
-Backend
-Python 3 - Linguagem principal
-Flask - Framework web
-Postgre - Banco de dados no Neon
-JWT - Autenticação segura
-Passlib - Criptografia de senhas
+## ✨ Funcionalidades
 
-Frontend
-HTML5 - Estrutura semântica
-CSS3 - Estilização moderna
-JavaScript ES6+ - Interatividade
-Fetch API - Comunicação com backend
+* **Autenticação Segura:** Registo e login utilizando tokens **JWT** e criptografia de palavras-passe.
+* **Gestão de Acervo:** Visualização detalhada de livros disponíveis.
+* **Reservas Inteligentes:** Sistema de reserva e devolução com controlo rigoroso de datas.
+* **Painel do Utilizador:** Perfil dedicado para acompanhamento de empréstimos ativos.
+* **Interface Adaptável:** Design totalmente responsivo para dispositivos móveis e desktop.
 
-⁉️ Como testar o projeto
-Instalação e Execução
-# Clone o repositório
-git clone library
-cd library
+## 🛠️ Tecnologias
 
-# Instale as dependências
-pip install -r requirements.txt
+### **Backend**
+* **Linguagem:** Python 3
+* **Framework:** Flask
+* **Banco de Dados:** PostgreSQL (Hospedado no Neon) / SQLite (Desenvolvimento)
+* **Segurança:** JWT (JSON Web Tokens) e Passlib
 
-# Execute a aplicação
-python app.py
+### **Frontend**
+* **Estrutura/Estilo:** HTML5 & CSS3
+* **Lógica:** JavaScript (ES6+)
+* **Comunicação:** Fetch API
 
-🔌 API Endpoints
-Autenticação
-POST /api/cadastrar - Registrar novo usuário
-POST /api/login - Fazer login na aplicação
-******************************************************************************
-Livros
-GET /api/listar_livros - Listar todos os livros (requer autenticação)
-POST /api/reservar - Reservar livro (requer autenticação)
-POST /api/devolver - Devolver livro (requer autenticação)
-******************************************************************************
-Usuário
-GET /api/listar_reservas - Listar reservas do usuário (requer autenticação)
+## 🚀 Como Executar o Projeto
 
-🗃️ Estrutura do Banco de Dados
-O sistema utiliza SQLite com as seguintes tabelas:
+1.  **Clonar o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/library.git
+    cd library
+    ```
 
-🔡Tabela usuarios
-id INTEGER PRIMARY KEY AUTOINCREMENT
-nome TEXT NOT NULL
-email TEXT UNIQUE NOT NULL
-senha_hash TEXT NOT NULL
-genero TEXT
-idade INTEGER
-qtd_reservas INTEGER
-******************************************************************************
-🔡Tabela livros
-sql
-id INTEGER PRIMARY KEY AUTOINCREMENT
-titulo_livro TEXT NOT NULL
-autor TEXT NOT NULL
-genero TEXT
-data_lancamento TEXT
-disponibilidade BOOLEAN
-******************************************************************************
-🔡Tabela reservas
-sql
-id INTEGER PRIMARY KEY AUTOINCREMENT
-id_usuario INTEGER FOREIGN KEY
-id_livro INTEGER FOREIGN KEY
-data_reserva TEXT
-data_devolucao TEXT
-data_devolucao_real TEXT
+2.  **Criar ambiente Python:**
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
 
-👨💻 Autor
-Kauê Vera - Desenvolvido como projeto final do CS50
+3.  **Instalar as dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Iniciar o servidor:**
+    ```bash
+    python app.py
+    ```
+    A aplicação estará disponível em `http://localhost:5000`.
+
+## 🗃️ Estrutura do Banco de Dados
+
+O sistema utiliza uma arquitetura relacional com as seguintes tabelas principais:
+
+* **`usuarios`**: Armazena dados de perfil e `senha_hash`.
+* **`livros`**: Contém detalhes técnicos e a flag de `disponibilidade`.
+* **`reservas`**: Tabela associativa que liga utilizadores a livros, registando datas de reserva e devolução.
+
+## 👨‍💻 Autor
+**Kauê Vera**
+*Projeto Final - CS50 Introduction to Computer Science*
