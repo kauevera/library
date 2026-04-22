@@ -3,7 +3,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
-    const API_URL = "https://library-q1vj.onrender.com"; //Configurado com o domínio resultante do Deploy
+    const API_URL = "http://localhost:5000"; //Configurado com o domínio local
 
     try {
         //Inicia conexão com o servidor na rota necessária
@@ -19,7 +19,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             localStorage.setItem("token", data.token); // Armazena o token
             localStorage.setItem("username", data.username); // Armazena o Username
             alert(data.message || "O login deu certo!");
-            window.location.href = "livros.html"; // Redireciona            
+            window.location.href = "/livros"; // Redireciona            
         } else {
             alert(data.message || "Erro no login");
         }
